@@ -12,6 +12,8 @@ PKZIP Overdrive is a focused Python launcher for Hashcat. It validates the GPU, 
 - Hashcat workload profile 4 with automatic kernel tuning
 - No CPU/OpenCL hashing, leaving Windows responsive
 - Aggregate speed, progress, temperature, utilization, and ETA updates
+- Interactive maximum-length prompt capped at 10; every run starts at length 1
+- Interactive ZIP path/directory prompt with automatic `zip2john` hash extraction and mode selection
 - Resumable sessions and a shared potfile
 - 88°C emergency temperature cutoff
 - Two-stage keyboard stop: press `Esc` twice to stop cleanly
@@ -35,10 +37,38 @@ Actual speed varies with PKZIP mode, member size, compression method, thermals, 
 
 ## Quick start
 
-Place a Hashcat-compatible PKZIP record in `pkzip.hash`, ensure Hashcat is on `PATH`, and run from PowerShell:
+Ensure Hashcat and `zip2john` are on `PATH`, then run from PowerShell:
 
 ```powershell
-python .\pkzip_overdrive.py start .\pkzip.hash --mode 17200 --charset ascii --min-length 6 --max-length 12
+python .\pkzip_overdrive.py
+```
+
+Running without arguments starts the complete guided flow. The launcher first finds valid saved checkpoints and lets you resume one or start a new attack. New attacks prompt for a checkpoint name; pressing Enter uses a Windows-safe timestamp such as `pkzip_2026-07-16_14-30-00`. It then asks for the ZIP path, attack method, and wordlist or maximum length. You can also paste a directory: its only ZIP is selected automatically, or the launcher displays a numbered choice when several ZIPs are present. Surrounding quotes and paths containing spaces or parentheses are accepted.
+
+The startup checkpoint manager supports:
+
+- Enter a checkpoint number to resume it.
+- Enter `P`, then its number, to preview the ZIP/source path, attack type, latest attempted/total count and percentage, speed, attempts per minute, ETA, queue, mask, and checkpoint location.
+- Enter `D`, then its number, to delete its `.restore` checkpoint after typing `DELETE`. Other session logs and results are retained, and deletion is blocked while Hashcat is running.
+- Enter `0` or press Enter to start a new attack.
+
+New sessions save their source and latest status in `session-info.json` after every Hashcat status update. Checkpoints created by older launcher versions can still expose their attack mode, current mask, and restore-position percentage, but their original ZIP path displays as not recorded.
+
+The launcher reads ZIP metadata, selects a compact encrypted member, creates the PKZIP hash with `zip2john`, infers mode 17200 or 17210, and asks you to choose a dictionary or brute-force attack.
+
+| Attack | Interactive flow |
+| --- | --- |
+| Dictionary | Paste a wordlist file/directory; a directory with multiple wordlists displays a numbered choice |
+| Brute force | Select a maximum length from 1 through 10; every length from 1 through that selection is tested |
+
+For automation, provide both values explicitly:
+
+```powershell
+python .\pkzip_overdrive.py start "C:\path with spaces\archive.zip" --attack brute --max-length 7
+```
+
+```powershell
+python .\pkzip_overdrive.py start "C:\path with spaces\archive.zip" --attack dictionary --wordlist "C:\wordlists\rockyou.txt"
 ```
 
 Use `--hashcat C:\path\to\hashcat.exe` when Hashcat is not on `PATH`. Session data defaults to `%LOCALAPPDATA%\hashcat-rtx2080ti` on Windows.
@@ -49,10 +79,21 @@ The launcher prints the generated session name at startup. Do not run multiple H
 
 - Press `Esc` once to arm termination.
 - Press `Esc` again to stop Hashcat and preserve its restore checkpoint.
-- Press any other key after the first `Esc` to cancel termination.
+- Pressing a native Hashcat command after the first `Esc` cancels double-Esc termination and forwards the command.
 - When a password is recovered, Hashcat stops, PKZIP Overdrive displays it, and the console waits for Enter before closing.
+- Whenever Hashcat exits, the launcher prints the absolute `.restore` checkpoint path and an exact resume command. It also writes those details to `checkpoint-info.txt` in the session directory.
+- The latest ZIP path and aggregate progress are persisted to `session-info.json` for the next startup preview.
 
-Hashcat's `Progress` value is the total number of candidates attempted across all active device workers. `Speed.#*` is per-device throughput and `Speed.#*`/aggregate status is the combined rate.
+| Key | Action |
+| --- | --- |
+| `s` or Enter | Show status immediately |
+| `p` / `r` | Pause / resume |
+| `b` | Bypass the current wordlist/mask and advance to the next queued attack |
+| `c` | Toggle stopping at the next restore checkpoint |
+| `f` | Toggle finishing the current wordlist/mask before stopping |
+| `q` | Quit Hashcat cleanly |
+
+Hashcat's `Progress` value is the total number of candidates attempted across all active device workers. `Speed.#01`, `Speed.#02`, and so on are per-device rates; `Speed.#*` is the combined rate.
 
 ## Resume a stopped session
 
@@ -86,7 +127,7 @@ Large masks grow exponentially. Narrow the character set and length range whenev
 - A compatible NVIDIA driver and CUDA Toolkit
 - Python 3.10 or newer
 - Hashcat 7.1.2
-- A Hashcat-compatible `$pkzip$` or `$pkzip2$` record extracted from an authorized archive
+- John the Ripper's `zip2john` executable for direct ZIP input (or an existing `$pkzip$`/`$pkzip2$` hash file)
 
 ## Licensing and contact
 
