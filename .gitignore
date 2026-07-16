@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+*.exp
+*.lib
+wordlist_merger_crash.log
+.*.partial
+combined_wordlist.txt

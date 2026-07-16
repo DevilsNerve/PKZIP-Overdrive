@@ -120,6 +120,29 @@ python .\pkzip_overdrive.py benchmark --mode 17220
 
 Large masks grow exponentially. Narrow the character set and length range whenever you know anything about the password format.
 
+## GPU wordlist merger
+
+The repository also includes an interactive Windows wordlist merger. It opens `%USERPROFILE%\Downloads\lists`, lists the `.txt` files with checkboxes, and writes the selected files to a user-chosen output.
+
+Launch it by double-clicking `Launch Wordlist Merger.cmd`, or from Command Prompt:
+
+```bat
+"Launch Wordlist Merger.cmd"
+```
+
+Two merge modes are available:
+
+| Mode | Behavior |
+| --- | --- |
+| GPU dedupe | Uses the RTX 2080 Ti CUDA helper to generate 128-bit line fingerprints, preserves first-seen order, removes duplicate lines, and optionally skips blank lines |
+| Exact combine | Uses large buffered disk I/O and preserves every input line; this is the fastest path when deduplication is not needed |
+
+Raw file copying is limited by storage throughput, so the GPU is used only for the line-hashing work it can accelerate. GPU dedupe refuses to compete with an active Hashcat process; Exact combine remains available while Hashcat is running.
+
+The prebuilt `wordlist_gpu_hash.dll` targets the RTX 2080 Ti's `sm_75` architecture. To rebuild it locally, install the CUDA Toolkit and Visual Studio C++ tools, then run `Build Wordlist GPU Helper.cmd`.
+
+The launcher records startup and error details in `wordlist_merger_crash.log`. If startup fails, its console remains open and displays the same traceback. Source wordlists are never modified, and an output file is replaced only after a successful merge.
+
 ## Requirements
 
 - Windows 10 or 11
