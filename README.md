@@ -1,5 +1,6 @@
 # PKZIP Overdrive
 
+[![Python tests](https://github.com/DevilsNerve/PKZIP-Overdrive/actions/workflows/tests.yml/badge.svg)](https://github.com/DevilsNerve/PKZIP-Overdrive/actions/workflows/tests.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 
 Maximum-throughput PKZIP password recovery for a dedicated NVIDIA GeForce RTX 2080 Ti.
