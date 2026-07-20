@@ -1,0 +1,79 @@
+name: Bug report
+description: Report a reproducible PKZIP Overdrive defect with sanitized data
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Never attach a real archive, extracted
+        hash, wordlist, potfile, recovered password, or unredacted log. Report
+        security vulnerabilities through the private link below instead.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - PKZIP launcher
+        - Checkpoint or restore flow
+        - Wordlist merger
+        - CUDA helper build or probe
+        - Documentation
+    validations:
+      required: true
+
+  - type: input
+    id: revision
+    attributes:
+      label: Commit or release
+      placeholder: Commit SHA or release name
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: List Windows, Python, Hashcat, CUDA, driver, and GPU versions that apply.
+      placeholder: |
+        Windows:
+        Python:
+        Hashcat:
+        CUDA and driver:
+        GPU:
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Use synthetic, non-sensitive inputs and include the exact command or UI path.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and sanitized output
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I used only archives and data I own or am explicitly authorized to test.
+          required: true
+        - label: I removed archives, hashes, wordlists, passwords, and identifying paths from this report.
+          required: true
+        - label: This is not an undisclosed security vulnerability.
+          required: true

@@ -170,6 +170,14 @@ The launcher records startup and error details in `wordlist_merger_crash.log`. I
 - Hashcat 7.1.2
 - John the Ripper's `zip2john` executable for direct ZIP input (or an existing `$pkzip$`/`$pkzip2$` hash file)
 
+## Contributing and security
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development checks, native Windows
+and CUDA verification, pull-request expectations, and recovery-data handling.
+Report vulnerabilities privately using [SECURITY.md](SECURITY.md); never place
+real archives, hashes, wordlists, recovered passwords, or unredacted logs in a
+public issue.
+
 ## Licensing and contact
 
 The source and compiled project files in this repository are licensed under
