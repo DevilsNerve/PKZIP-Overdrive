@@ -33,6 +33,14 @@ GPU_NAME_FRAGMENT = "RTX 2080 Ti"
 MIN_VRAM_MIB = 10_000
 MAX_PASSWORD_LENGTH = 10
 PKZIP_MODES = {17200, 17210, 17220, 17225, 17230}
+WINDOWS_DEVICE_NAMES = {
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
+    *(f"COM{number}" for number in range(1, 10)),
+    *(f"LPT{number}" for number in range(1, 10)),
+}
 DEFAULT_STATE_ROOT = (
     Path(os.environ.get("LOCALAPPDATA", Path.home())) / "hashcat-rtx2080ti"
     if os.name == "nt"
@@ -932,6 +940,15 @@ def validate_session(value: str) -> str:
     if not re.fullmatch(r"[A-Za-z0-9_.-]+", value):
         raise argparse.ArgumentTypeError(
             "session may contain only letters, digits, dot, underscore, and dash"
+        )
+    if value in {".", ".."}:
+        raise argparse.ArgumentTypeError("session may not be dot or dot-dot")
+    if value.endswith("."):
+        raise argparse.ArgumentTypeError("session may not end with a dot")
+    device_stem = value.split(".", 1)[0].upper()
+    if device_stem in WINDOWS_DEVICE_NAMES:
+        raise argparse.ArgumentTypeError(
+            f"session uses a reserved Windows device name: {device_stem}"
         )
     return value
 

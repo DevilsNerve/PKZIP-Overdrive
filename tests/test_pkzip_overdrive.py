@@ -234,8 +234,19 @@ class InputTests(unittest.TestCase):
 class ValidationTests(unittest.TestCase):
     def test_session_and_numeric_validators(self) -> None:
         self.assertEqual(overdrive.validate_session("job-2026.07_20"), "job-2026.07_20")
-        with self.assertRaises(argparse.ArgumentTypeError):
-            overdrive.validate_session("unsafe/session")
+        for invalid_session in (
+            "unsafe/session",
+            ".",
+            "..",
+            "job.",
+            "CON",
+            "nul.txt",
+            "COM1.restore",
+            "lpt9",
+        ):
+            with self.subTest(invalid_session=invalid_session):
+                with self.assertRaises(argparse.ArgumentTypeError):
+                    overdrive.validate_session(invalid_session)
         self.assertEqual(overdrive.length("10"), 10)
         self.assertEqual(overdrive.status_interval("15"), 15)
         for invalid in ("0", "11", "not-a-number"):

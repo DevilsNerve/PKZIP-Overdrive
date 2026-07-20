@@ -48,6 +48,10 @@ python .\pkzip_overdrive.py
 
 Running without arguments starts the complete guided flow. The launcher first finds valid saved checkpoints and lets you resume one or start a new attack. New attacks prompt for a checkpoint name; pressing Enter uses a Windows-safe timestamp such as `pkzip_2026-07-16_14-30-00`. It then asks for the ZIP path, attack method, and wordlist or maximum length. You can also paste a directory: its only ZIP is selected automatically, or the launcher displays a numbered choice when several ZIPs are present. Surrounding quotes and paths containing spaces or parentheses are accepted.
 
+Custom checkpoint names may use letters, digits, dots, underscores, and dashes.
+Names that Windows reserves for devices, such as `CON`, `NUL`, `COM1`, and
+`LPT1`, are rejected, including when they have an extension.
+
 The startup checkpoint manager supports:
 
 - Enter a checkpoint number to resume it.
