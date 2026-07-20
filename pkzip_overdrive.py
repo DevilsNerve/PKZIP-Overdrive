@@ -667,13 +667,24 @@ def choose_source_path(provided: str | None) -> Path:
     provided = provided.strip()
     if len(provided) >= 2 and provided[0] == provided[-1] and provided[0] in "\"'":
         provided = provided[1:-1]
+    if not provided:
+        raise SystemExit("error: ZIP/hash path cannot be empty")
     source = Path(os.path.expandvars(provided)).expanduser().resolve()
 
     if source.is_dir():
-        archives = sorted(
-            (path for path in source.glob("*.zip") if path.is_file()),
-            key=lambda path: path.name.casefold(),
-        )
+        try:
+            archives = sorted(
+                (
+                    path
+                    for path in source.iterdir()
+                    if path.is_file() and path.suffix.casefold() == ".zip"
+                ),
+                key=lambda path: path.name.casefold(),
+            )
+        except OSError as error:
+            raise SystemExit(
+                f"error: cannot list ZIP directory {source}: {error}"
+            ) from error
         if not archives:
             raise SystemExit(f"error: no ZIP files found directly in directory: {source}")
         if len(archives) == 1:
@@ -686,12 +697,17 @@ def choose_source_path(provided: str | None) -> Path:
             while True:
                 try:
                     selected = input(f"Select ZIP (1-{len(archives)}): ").strip()
+                except EOFError as error:
+                    raise SystemExit(
+                        "error: interactive input ended; provide an explicit ZIP file path"
+                    ) from error
+                try:
                     selected_index = int(selected)
-                    if 1 <= selected_index <= len(archives):
-                        source = archives[selected_index - 1]
-                        break
-                except (EOFError, ValueError):
-                    pass
+                except ValueError:
+                    selected_index = 0
+                if 1 <= selected_index <= len(archives):
+                    source = archives[selected_index - 1]
+                    break
                 print("error: enter one of the displayed numbers", file=sys.stderr)
 
     if not source.is_file():
@@ -740,15 +756,24 @@ def choose_wordlist_path(provided: str | None) -> Path:
     provided = provided.strip()
     if len(provided) >= 2 and provided[0] == provided[-1] and provided[0] in "\"'":
         provided = provided[1:-1]
+    if not provided:
+        raise SystemExit("error: wordlist path cannot be empty")
     wordlist = Path(os.path.expandvars(provided)).expanduser().resolve()
 
     if wordlist.is_dir():
         preferred_suffixes = {".txt", ".dict", ".dic", ".lst", ".wordlist", ".gz"}
-        all_files = sorted(
-            (path for path in wordlist.iterdir() if path.is_file()),
-            key=lambda path: path.name.casefold(),
-        )
-        preferred = [path for path in all_files if path.suffix.casefold() in preferred_suffixes]
+        try:
+            all_files = sorted(
+                (path for path in wordlist.iterdir() if path.is_file()),
+                key=lambda path: path.name.casefold(),
+            )
+        except OSError as error:
+            raise SystemExit(
+                f"error: cannot list wordlist directory {wordlist}: {error}"
+            ) from error
+        preferred = [
+            path for path in all_files if path.suffix.casefold() in preferred_suffixes
+        ]
         files = preferred or all_files
         if not files:
             raise SystemExit(f"error: no wordlist files found in directory: {wordlist}")
@@ -762,12 +787,17 @@ def choose_wordlist_path(provided: str | None) -> Path:
             while True:
                 try:
                     selected = input(f"Select wordlist (1-{len(files)}): ").strip()
+                except EOFError as error:
+                    raise SystemExit(
+                        "error: interactive input ended; provide an explicit wordlist file path"
+                    ) from error
+                try:
                     selected_index = int(selected)
-                    if 1 <= selected_index <= len(files):
-                        wordlist = files[selected_index - 1]
-                        break
-                except (EOFError, ValueError):
-                    pass
+                except ValueError:
+                    selected_index = 0
+                if 1 <= selected_index <= len(files):
+                    wordlist = files[selected_index - 1]
+                    break
                 print("error: enter one of the displayed numbers", file=sys.stderr)
 
     if not wordlist.is_file():
