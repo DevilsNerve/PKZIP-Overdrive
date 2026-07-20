@@ -31,7 +31,27 @@ class SessionInfoTests(unittest.TestCase):
             information.write_text("not json\n", encoding="utf-8")
             self.assertEqual(overdrive.load_session_info(directory), {})
 
+
 class DiscoveryTests(unittest.TestCase):
+    def test_latest_cuda_toolkit_uses_numeric_version_order(self) -> None:
+        with tempfile.TemporaryDirectory() as directory_name:
+            root = Path(directory_name)
+            for version in ("v9.2", "v12.9", "v12.10", "v13.1"):
+                (root / version).mkdir()
+            (root / "version-latest").mkdir()
+            (root / "v99.0").write_text("not a directory", encoding="utf-8")
+
+            selected = overdrive.latest_cuda_toolkit(root)
+
+        self.assertEqual(selected, (root / "v13.1").resolve())
+
+    def test_latest_cuda_toolkit_handles_missing_or_invalid_directories(self) -> None:
+        with tempfile.TemporaryDirectory() as directory_name:
+            root = Path(directory_name)
+            (root / "latest").mkdir()
+            self.assertIsNone(overdrive.latest_cuda_toolkit(root))
+            self.assertIsNone(overdrive.latest_cuda_toolkit(root / "missing"))
+
     def test_detect_gpu_selects_the_only_supported_card(self) -> None:
         completed = subprocess.CompletedProcess(
             args=[],
