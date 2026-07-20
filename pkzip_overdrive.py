@@ -208,6 +208,30 @@ def detect_gpu(nvidia_smi: str) -> Gpu:
     return gpu
 
 
+def cuda_version_components(path: Path) -> tuple[int, ...]:
+    match = re.fullmatch(r"v(\d+(?:\.\d+)*)", path.name, re.IGNORECASE)
+    if not match:
+        return ()
+    return tuple(int(component) for component in match.group(1).split("."))
+
+
+def latest_cuda_toolkit(toolkit_parent: Path) -> Path | None:
+    try:
+        candidates = [
+            path
+            for path in toolkit_parent.iterdir()
+            if path.is_dir() and cuda_version_components(path)
+        ]
+    except OSError:
+        return None
+    if not candidates:
+        return None
+    return max(
+        candidates,
+        key=lambda path: (cuda_version_components(path), path.name.casefold()),
+    ).resolve()
+
+
 def windows_cuda_root(override: str | None) -> Path | None:
     if os.name != "nt":
         return None
@@ -233,8 +257,7 @@ def windows_cuda_root(override: str | None) -> Path | None:
     toolkit_parent = Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / (
         "NVIDIA GPU Computing Toolkit/CUDA"
     )
-    versions = sorted(toolkit_parent.glob("v*"), reverse=True)
-    return versions[0].resolve() if versions else None
+    return latest_cuda_toolkit(toolkit_parent)
 
 
 def gpu_environment(
