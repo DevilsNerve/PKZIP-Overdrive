@@ -1,4 +1,5 @@
 @echo off
+rem SPDX-License-Identifier: AGPL-3.0-only
 setlocal
 set "BUILD_TEMP=C:\Users\Public\wordlist-nvcc-temp"
 

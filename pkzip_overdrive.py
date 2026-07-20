@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-only
 """Dedicated PKZIP launcher for one NVIDIA GeForce RTX 2080 Ti.
 
 Hashcat performs the attack directly. This wrapper only validates the GPU and

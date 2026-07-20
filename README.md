@@ -1,5 +1,7 @@
 # PKZIP Overdrive
 
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
+
 Maximum-throughput PKZIP password recovery for a dedicated NVIDIA GeForce RTX 2080 Ti.
 
 PKZIP Overdrive is a focused Python launcher for Hashcat. It validates the GPU, isolates CUDA to one RTX 2080 Ti, selects a supported PKZIP mode, applies maximum-performance workload settings, maintains resumable sessions, and shows Hashcat's aggregate speed and progress counter every 10 seconds.
@@ -154,8 +156,14 @@ The launcher records startup and error details in `wordlist_merger_crash.log`. I
 
 ## Licensing and contact
 
-The public edition of PKZIP Overdrive is licensed under the **GNU Affero General Public License v3.0**, as provided in this repository's `LICENSE` file.
+The source and compiled project files in this repository are licensed under
+**GNU Affero General Public License v3.0 only**
+([`AGPL-3.0-only`](https://spdx.org/licenses/AGPL-3.0-only.html)). See
+[`LICENSE`](LICENSE) for the complete terms.
 
-For an alternative private/commercial license, custom builds, and support, visit **[austenjgreen.com](https://austenjgreen.com/)**.
+For alternative licensing, custom builds, and support, visit
+**[austenjgreen.com](https://austenjgreen.com/)**.
 
-Hashcat, NVIDIA CUDA, and John the Ripper/`zip2john` are third-party projects governed by their respective licenses and are not included under the PKZIP Overdrive private license.
+Hashcat, NVIDIA CUDA, and John the Ripper/`zip2john` are third-party projects
+governed by their respective licenses. They are not distributed as part of
+this repository.

@@ -1,4 +1,5 @@
 @echo off
+rem SPDX-License-Identifier: AGPL-3.0-only
 setlocal
 cd /d "%~dp0"
 set "LOG=%~dp0wordlist_merger_crash.log"
