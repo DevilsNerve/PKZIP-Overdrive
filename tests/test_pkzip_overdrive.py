@@ -148,14 +148,25 @@ class InputTests(unittest.TestCase):
                 mode = stat.S_IMODE(destination.stat().st_mode)
                 self.assertEqual(mode, 0o600)
 
-    def test_choose_source_path_uses_a_directorys_only_zip(self) -> None:
+    def test_choose_source_path_uses_a_directorys_only_zip_case_insensitively(self) -> None:
         with tempfile.TemporaryDirectory() as directory_name:
             directory = Path(directory_name)
-            expected = directory / "archive.zip"
+            expected = directory / "archive.ZIP"
             expected.write_bytes(b"not needed for path selection")
             with mock.patch("builtins.print"):
                 selected = overdrive.choose_source_path(str(directory))
             self.assertEqual(selected, expected.resolve())
+
+    def test_multiple_archives_fail_cleanly_when_interactive_input_ends(self) -> None:
+        with tempfile.TemporaryDirectory() as directory_name:
+            directory = Path(directory_name)
+            (directory / "first.zip").write_bytes(b"first")
+            (directory / "second.zip").write_bytes(b"second")
+            with mock.patch("builtins.print"), mock.patch(
+                "builtins.input", side_effect=EOFError
+            ):
+                with self.assertRaisesRegex(SystemExit, "explicit ZIP file path"):
+                    overdrive.choose_source_path(str(directory))
 
     def test_choose_wordlist_prefers_known_wordlist_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as directory_name:
@@ -166,6 +177,27 @@ class InputTests(unittest.TestCase):
             with mock.patch("builtins.print"):
                 selected = overdrive.choose_wordlist_path(str(directory))
             self.assertEqual(selected, expected.resolve())
+
+    def test_multiple_wordlists_fail_cleanly_when_interactive_input_ends(self) -> None:
+        with tempfile.TemporaryDirectory() as directory_name:
+            directory = Path(directory_name)
+            (directory / "first.txt").write_text("first\n", encoding="utf-8")
+            (directory / "second.txt").write_text("second\n", encoding="utf-8")
+            with mock.patch("builtins.print"), mock.patch(
+                "builtins.input", side_effect=EOFError
+            ):
+                with self.assertRaisesRegex(SystemExit, "explicit wordlist file path"):
+                    overdrive.choose_wordlist_path(str(directory))
+
+    def test_empty_paths_are_rejected(self) -> None:
+        for chooser in (
+            overdrive.choose_source_path,
+            overdrive.choose_wordlist_path,
+        ):
+            for value in ("", '""', "''"):
+                with self.subTest(chooser=chooser.__name__, value=value):
+                    with self.assertRaisesRegex(SystemExit, "path cannot be empty"):
+                        chooser(value)
 
     def test_identify_mode_requires_one_supported_match(self) -> None:
         completed = subprocess.CompletedProcess(
