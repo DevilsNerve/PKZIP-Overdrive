@@ -99,7 +99,7 @@ class SessionTracker:
 
     def consume(self, raw_line: str) -> None:
         line = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", raw_line).strip()
-        field = re.match(r"^([A-Za-z][A-Za-z0-9.#]*?)\.*:\s*(.*)$", line)
+        field = re.match(r"^([A-Za-z][A-Za-z0-9.#*]*?)\.*:\s*(.*)$", line)
         if field:
             label, value = field.groups()
             key: str | None = None
