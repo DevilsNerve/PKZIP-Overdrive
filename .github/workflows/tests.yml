@@ -16,16 +16,28 @@ concurrency:
 
 jobs:
   tests:
-    name: Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    name: ${{ matrix.platform }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          - "3.10"
-          - "3.12"
-          - "3.14"
+        include:
+          - platform: Linux
+            runner: ubuntu-latest
+            python-version: "3.10"
+          - platform: Linux
+            runner: ubuntu-latest
+            python-version: "3.12"
+          - platform: Linux
+            runner: ubuntu-latest
+            python-version: "3.14"
+          - platform: Windows
+            runner: windows-latest
+            python-version: "3.10"
+          - platform: Windows
+            runner: windows-latest
+            python-version: "3.14"
     env:
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
@@ -47,4 +59,4 @@ jobs:
         run: python wordlist_merger_gpu.py --self-test
 
       - name: Verify official license fingerprint
-        run: echo "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0  LICENSE" | sha256sum --check --strict
+        run: python -c "import hashlib, pathlib; actual = hashlib.sha256(pathlib.Path('LICENSE').read_bytes()).hexdigest(); assert actual == '0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0', actual"

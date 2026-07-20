@@ -1,0 +1,5 @@
+# Keep the official license byte-for-byte stable on every checkout.
+LICENSE text eol=lf
+
+# Never apply text conversion to the bundled Windows helper.
+*.dll binary
