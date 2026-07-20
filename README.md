@@ -111,6 +111,17 @@ python .\pkzip_overdrive.py restore SESSION_NAME
 python .\pkzip_overdrive.py benchmark --mode 17220
 ```
 
+## Development checks
+
+The regression suite uses only the Python standard library and exercises the
+launcher parsers, checkpoint metadata, protected hash extraction, exact merge,
+deduplication, cancellation, and failure cleanup:
+
+```powershell
+python -m unittest discover -s tests -v
+python .\wordlist_merger_gpu.py --self-test
+```
+
 ## Character sets
 
 | Value | Hashcat mask | Contents |
